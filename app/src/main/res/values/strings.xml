@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">training</string>
+    <string name="name">Enter your name</string>
+    <string name="password">Enter your password</string>
+    <string name="sign_up">Sign up</string>
+    <string name="set_alarm">Set Alarm</string>
+    <string name="translate_your_name_to_french">Translate your name to French</string>
+    <string name="take_a_picture">Take a picture</string>
+    <string name="camera">Camera</string>
+    <string name="camera_not_found">No Camera App found on device</string>
+    <string name="image_captured">Image captured</string>
+    <string name="ok">OK</string>
+    <string name="navigate">Navigate</string>
+    <string name="finish">Finish</string>
+    <string name="result">Result</string>
+    <string name="result_received">Result Received</string>
+</resources>

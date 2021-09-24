@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">प्रशिक्षण</string>
+    <string name="name">अपना नाम दर्ज करें</string>
+    <string name="password">अपना कूटशब्द भरें</string>
+    <string name="sign_up">साइन अप करें</string>
+    <string name="set_alarm">चेतावनी तय करें</string>
+    <string name="translate_your_name_to_french">अपने नाम का फ्रेंच में अनुवाद करें</string>
+    <string name="take_a_picture">एक तस्वीर ले लो</string>
+    <string name="camera">कैमरा</string>
+    <string name="camera_not_found">डिवाइस पर कोई कैमरा ऐप नहीं मिला</string>
+    <string name="image_captured">छवि कैप्चर की गई</string>
+    <string name="ok">ठीक है</string>
+    <string name="navigate">नेविगेट</string>
+    <string name="finish">खत्म</string>
+    <string name="result">परिणाम</string>
+    <string name="result_received">परिणाम प्राप्त</string>
+</resources>
