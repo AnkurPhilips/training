@@ -3,12 +3,16 @@ package com.philips.training
 import android.Manifest.permission.CAMERA
 import android.app.AlertDialog
 import android.content.ActivityNotFoundException
+import android.content.ComponentName
 import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.IBinder
 import android.provider.AlarmClock
 import android.provider.MediaStore
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -26,6 +30,24 @@ private const val REQUEST_RESULT_ACTIVITY: Int = 103
 class OtherActivity : AppCompatActivity() , ActivityCompat.OnRequestPermissionsResultCallback {
     private var name = ""
     private var password = ""
+
+    private lateinit var serviceNow: ServiceNow
+
+
+    private var serviceConnection= object : ServiceConnection {
+        override fun onServiceConnected(p0: ComponentName?,
+                                        p1: IBinder?) {
+            val binder = p1 as ServiceNow.IMyBinder
+            serviceNow = binder.getService()
+            Toast.makeText(this@OtherActivity, "Bound", Toast.LENGTH_LONG).show()
+
+        }
+
+        override fun onServiceDisconnected(p0: ComponentName?) {
+            Toast.makeText(this@OtherActivity, "UnBound", Toast.LENGTH_LONG).show()
+        }
+
+    }
 
     override fun onRequestPermissionsResult(requestCode: Int,
                                             permissions: Array<out String>,
@@ -77,6 +99,16 @@ class OtherActivity : AppCompatActivity() , ActivityCompat.OnRequestPermissionsR
         resultActivity.setOnClickListener{
             val intent = Intent(this, ResultActivity::class.java)
             startActivityForResult(intent, REQUEST_RESULT_ACTIVITY)
+        }
+
+        bind.setOnClickListener {
+            val intent = MainActivity.getServiceIntent(this)
+            bindService(intent, serviceConnection, BIND_AUTO_CREATE)
+
+        }
+
+        unbind.setOnClickListener {
+            unbindService(serviceConnection)
         }
 
     }
