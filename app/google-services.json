@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "183873025238",
+    "project_id": "training-f1f99",
+    "storage_bucket": "training-f1f99.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:183873025238:android:89658187c8f34c188b0577",
+        "android_client_info": {
+          "package_name": "com.philips.training"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "183873025238-frn6e1rm911auc9mekaei7g6tvhopfke.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDe1REUXA2uCR4iOKdRkX4LmCpEGiBwJbo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "183873025238-frn6e1rm911auc9mekaei7g6tvhopfke.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -7,15 +7,17 @@ import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
 import android.provider.AlarmClock
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.philips.training.db.EntriesDao
+import com.philips.training.db.NoteEntry
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_other.*
 import kotlinx.android.synthetic.main.activity_other.button
@@ -28,8 +30,11 @@ private const val REQUEST_IMAGE_CAPTURE_PERMISSION = 102
 private const val REQUEST_RESULT_ACTIVITY: Int = 103
 
 class OtherActivity : AppCompatActivity() , ActivityCompat.OnRequestPermissionsResultCallback {
+    private var isBound: Boolean = false
     private var name = ""
     private var password = ""
+
+    private lateinit var entriesDao: EntriesDao
 
     private lateinit var serviceNow: ServiceNow
 
@@ -62,13 +67,21 @@ class OtherActivity : AppCompatActivity() , ActivityCompat.OnRequestPermissionsR
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_other)
+        entriesDao = EntriesDao(this)
+        entriesDao.openDB()
+        val entries = entriesDao.getAllEntries()
+        var data = ""
+        entries.forEach{ _entry ->
+            data+= "${_entry.data} : "
+        }
+        Log.i("All Entries", data)
         intent?.let {
             name = it.getStringExtra(NAME) ?: ""
             password = it.getStringExtra(PASSWORD) ?: ""
         }
         button.setOnClickListener {
-            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$name"))
-            (this@OtherActivity).startActivity(intent)
+            val entry = tv.text.toString()
+            entriesDao.deleteEntry(NoteEntry(entry))
         }
 
         alarm.setOnClickListener{
@@ -104,11 +117,14 @@ class OtherActivity : AppCompatActivity() , ActivityCompat.OnRequestPermissionsR
         bind.setOnClickListener {
             val intent = MainActivity.getServiceIntent(this)
             bindService(intent, serviceConnection, BIND_AUTO_CREATE)
-
+            isBound = true
         }
 
         unbind.setOnClickListener {
-            unbindService(serviceConnection)
+            if(isBound) {
+                unbindService(serviceConnection)
+                isBound = false
+            }
         }
 
     }
@@ -132,5 +148,10 @@ class OtherActivity : AppCompatActivity() , ActivityCompat.OnRequestPermissionsR
         super.onStart()
         tv.setText(name)
         et.setText(password)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        entriesDao.closeDB()
     }
 }
