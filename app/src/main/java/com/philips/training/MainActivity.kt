@@ -1,12 +1,17 @@
 package com.philips.training
 
+import android.Manifest
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.provider.CallLog
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
 import com.philips.training.db.EntriesDao
@@ -18,8 +23,10 @@ import kotlinx.android.synthetic.main.activity_main.*
 const val NAME="name"
 const val PASSWORD="password"
 
-class MainActivity : AppCompatActivity() {
 
+private const val REQUEST_SMS_READ: Int = 1009
+
+class MainActivity : AppCompatActivity() {
     private lateinit var entriesDao: EntriesDao
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,6 +95,40 @@ class MainActivity : AppCompatActivity() {
             val intent = getServiceIntent(this)
             stopService(intent)
         }
+
+        try {
+            val permission = listOf(Manifest.permission.READ_CALL_LOG)
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALL_LOG)
+                == PackageManager.PERMISSION_DENIED) {
+                ActivityCompat.requestPermissions(this, permission.toTypedArray(), REQUEST_SMS_READ)
+            }else{
+                readMessages()
+            }
+
+        } catch (e: Exception){
+            e.printStackTrace()
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int,
+                                            permissions: Array<out String>,
+                                            grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        readMessages()
+    }
+
+    private fun readMessages() {
+        val uri = CallLog.Calls.CONTENT_URI
+        val cursor = contentResolver.query(uri, null, null, null, null, null)
+        cursor?.let {
+            val bodyIndex = cursor.getColumnIndexOrThrow(CallLog.Calls.CACHED_NAME)
+            val addressIndex = cursor.getColumnIndexOrThrow(CallLog.Calls.NUMBER)
+            while (cursor.moveToNext()) {
+                val data = cursor.getString(bodyIndex) + " : " + cursor.getString(addressIndex)
+                Log.i("SMS Messages", data)
+            }
+        }
+        cursor?.close()
     }
 
     companion object {
