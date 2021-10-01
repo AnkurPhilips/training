@@ -8,6 +8,8 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.CallLog
 import android.util.Log
+import android.widget.Button
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -18,7 +20,10 @@ import com.philips.training.db.EntriesDao
 import com.philips.training.db.NoteEntry
 import com.philips.training.network.DownloadAsyncTask
 import com.philips.training.network.FetchBookTask
-import kotlinx.android.synthetic.main.activity_main.*
+import com.philips.training.room.RoomDB
+import com.philips.training.room.RoomEntry
+import com.philips.training.room.RoomEntryDao
+import kotlinx.coroutines.*
 
 const val NAME="name"
 const val PASSWORD="password"
@@ -29,11 +34,14 @@ private const val REQUEST_SMS_READ: Int = 1009
 class MainActivity : AppCompatActivity() {
     private lateinit var entriesDao: EntriesDao
 
+    private var roomEntriesDao: RoomEntryDao? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         entriesDao = EntriesDao(this)
         entriesDao.openDB()
+        roomEntriesDao = RoomDB.getInstance((this@MainActivity).applicationContext)?.roomEntryDao()
     }
 
     override fun onStart() {
@@ -54,12 +62,20 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this@MainActivity, msg, Toast.LENGTH_SHORT).show()
         })
 
-        button.setOnClickListener {
-
-            val name = tv.text.toString()
-            val password = et.text.toString()
+        findViewById<Button>(R.id.button).setOnClickListener {
+            val name = findViewById<EditText>(R.id.tv).text.toString()
+            val password = findViewById<EditText>(R.id.et).text.toString()
             if(name.isNotBlank() && password.isNotBlank()) {
-                entriesDao.insertEntry(NoteEntry(name))
+                val entry = RoomEntry(name)
+                GlobalScope.launch {
+                    roomEntriesDao?.insert(entry)
+                    Log.i("List", roomEntriesDao?.getAlphabetizedWords()?.toString()?:"")
+                }
+                try {
+                    entriesDao.insertEntry(NoteEntry(name))
+                }catch (e: Exception){
+                    e.printStackTrace()
+                }
                 val intent = Intent(this, OtherActivity::class.java)
                 intent.putExtra(NAME, name)
                 intent.putExtra(PASSWORD, password)
@@ -67,31 +83,33 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        download.setOnClickListener {
-            val downLoadAsyncTask = DownloadAsyncTask(progress)
+        findViewById<Button>(R.id.download).setOnClickListener {
+            val downLoadAsyncTask = DownloadAsyncTask(findViewById(R.id.progress))
             downLoadAsyncTask.execute()
         }
 
-        callApi.setOnClickListener {
+        findViewById<Button>(R.id.callApi).setOnClickListener {
+            val search = findViewById<EditText>(R.id.search)
             val bookName = search.text.toString()
             val fetchBookTask = FetchBookTask(search)
             fetchBookTask.execute(bookName)
         }
 
-        weatherApi.setOnClickListener{
+        findViewById<Button>(R.id.weatherApi).setOnClickListener{
+            val weather = findViewById<EditText>(R.id.weather)
             val city = weather.text.toString()
             val fetchWeatherTask = FetchWeatherTask(weather)
             fetchWeatherTask.execute(city)
         }
 
-        start.setOnClickListener {
+        findViewById<Button>(R.id.start).setOnClickListener {
             val intent = getServiceIntent(this)
-            val data = tv.text.toString()
+            val data = findViewById<EditText>(R.id.tv).text.toString()
             intent.putExtra("DATA", data)
             startService(intent)
         }
 
-        stop.setOnClickListener {
+        findViewById<Button>(R.id.stop).setOnClickListener {
             val intent = getServiceIntent(this)
             stopService(intent)
         }
